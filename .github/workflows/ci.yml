@@ -4,8 +4,6 @@ on:
   workflow_call:
   pull_request:
   push:
-    branches-ignore:
-      - master
 
 permissions:
   contents: read
@@ -39,10 +37,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -56,7 +54,7 @@ jobs:
           go build -trimpath -ldflags="-s -w" -o "dist/winarchive-tools-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}" ./cmd/winarchive-tools
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: winarchive-tools-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/winarchive-tools-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
