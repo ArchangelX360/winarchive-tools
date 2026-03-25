@@ -1,0 +1,53 @@
+name: Publish main Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  publish-main-release:
+    name: Publish binaries for main
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create or update release and upload assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="main-${GITHUB_SHA}"
+          ASSETS=(
+            dist/winarchive-tools-linux-amd64
+            dist/winarchive-tools-linux-arm64
+            dist/winarchive-tools-darwin-amd64
+            dist/winarchive-tools-darwin-arm64
+            dist/winarchive-tools-windows-amd64.exe
+            dist/winarchive-tools-windows-arm64.exe
+          )
+
+          if gh release view "$TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" --repo "$GH_REPO" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" \
+              --repo "$GH_REPO" \
+              --target "$GITHUB_SHA" \
+              --title "main-${GITHUB_SHA}" \
+              --notes "Automated release for commit ${GITHUB_SHA} on main." \
+              "${ASSETS[@]}"
+          fi
