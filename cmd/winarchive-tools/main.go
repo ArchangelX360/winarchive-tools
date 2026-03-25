@@ -23,8 +23,6 @@ func main() {
 		runZIPList(os.Args[2:])
 	case "zip-extract":
 		runZIPExtract(os.Args[2:])
-	case "write-vfs":
-		runWriteVFS(os.Args[2:])
 	case "help", "-h", "--help":
 		printUsageAndExit()
 	default:
